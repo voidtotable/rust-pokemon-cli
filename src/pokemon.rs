@@ -9,7 +9,7 @@ pub struct PokemonTable(Vec<PokemonRow>);
 
 impl PokemonTable {
     pub async fn new_from_type(type_: &String, c: &RustemonClient) -> Result<PokemonTable, Error> {
-                match rustemon::pokemon::type_::get_by_name(type_, c).await {
+        match rustemon::pokemon::type_::get_by_name(type_, c).await {
             Ok(t) => {
                 let futures = t.pokemon.iter().map(|tp| async {
                     let pokemon = tp.pokemon.follow(&c).await.unwrap();
@@ -18,9 +18,16 @@ impl PokemonTable {
                         .iter()
                         .map(|t| t.type_.name.to_string())
                         .collect();
-                    let abilities: Vec<String> =
-                        pokemon.abilities.iter().map(|a| a.ability.name.to_string()).collect();
-                    let moves: Vec<String> = pokemon.moves.iter().map(|m| m.move_.name.to_string()).collect();
+                    let abilities: Vec<String> = pokemon
+                        .abilities
+                        .iter()
+                        .map(|a| a.ability.name.to_string())
+                        .collect();
+                    let moves: Vec<String> = pokemon
+                        .moves
+                        .iter()
+                        .map(|m| m.move_.name.to_string())
+                        .collect();
                     PokemonRow {
                         name: pokemon.name,
                         types,
@@ -34,11 +41,10 @@ impl PokemonTable {
                 while let Some(row) = stream.next().await {
                     rows.push(row);
                 }
-                return Ok(PokemonTable(rows))
-            },
+                return Ok(PokemonTable(rows));
+            }
             Err(_) => todo!(),
         }
-        
     }
 }
 
