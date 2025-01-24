@@ -2,14 +2,14 @@ use clap::Parser;
 use futures::stream::FuturesUnordered;
 use futures::StreamExt;
 
+use rustemon::error::Error;
 use std::time::Duration;
 
 use rustemon::client::{
-    CACacheManager, CacheMode, CacheOptions, Environment, RustemonClientBuilder,
+    CACacheManager, CacheMode, CacheOptions, Environment, RustemonClient, RustemonClientBuilder,
 };
 
 use rustemon::Follow;
-
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -46,13 +46,16 @@ async fn main() {
         .try_build()
         .unwrap();
 
-    if let Some(name) = args.name.as_deref() {
-        let pokemon = rustemon::pokemon::pokemon::get_by_name(name, &client).await;
-
-        println!("{:#?}", pokemon);
+    if let Some(name) = args.name {
+        match PokemonRow::new(&name, &client).await {
+            Ok(row) => println!("{:#?}", row),
+            Err(_) => todo!(),
+        };
     }
 
     if let Some(types) = args.types.as_deref() {
+
+        /*
         let type_ = rustemon::pokemon::type_::get_by_name(types, &client).await;
 
         match type_ {
@@ -64,9 +67,16 @@ async fn main() {
                         .iter()
                         .map(|t| t.type_.name.to_string())
                         .collect();
-                    let abilities: Vec<String> =
-                        pokemon.abilities.iter().map(|a| a.ability.name.to_string()).collect();
-                    let moves: Vec<String> = pokemon.moves.iter().map(|m| m.move_.name.to_string()).collect();
+                    let abilities: Vec<String> = pokemon
+                        .abilities
+                        .iter()
+                        .map(|a| a.ability.name.to_string())
+                        .collect();
+                    let moves: Vec<String> = pokemon
+                        .moves
+                        .iter()
+                        .map(|m| m.move_.name.to_string())
+                        .collect();
                     PokemonRow {
                         name: pokemon.name,
                         types,
@@ -87,6 +97,16 @@ async fn main() {
             }
             Err(_) => todo!(),
         }
+        */
+    }
+}
+
+#[derive(Debug)]
+struct PokemonTable(Vec<PokemonRow>);
+
+impl PokemonTable {
+    async fn new_from_type(type_: String, c: &RustemonClient) -> Result<PokemonTable, Error> {
+        todo!()
     }
 }
 
@@ -97,14 +117,40 @@ struct PokemonRow {
     abilities: Vec<String>,
     moves: Vec<String>,
 }
-/* 
-impl PokemonRow {
-    fn new(name: String, c: RustemonClient) -> PokemonRow {
 
+impl PokemonRow {
+    async fn new(name: &String, c: &RustemonClient) -> Result<PokemonRow, Error> {
+        match rustemon::pokemon::pokemon::get_by_name(name, c).await {
+            Ok(pokemon) => {
+                let types: Vec<String> = pokemon
+                    .types
+                    .iter()
+                    .map(|t| t.type_.name.to_string())
+                    .collect();
+
+                let abilities: Vec<String> = pokemon
+                    .abilities
+                    .iter()
+                    .map(|a| a.ability.name.to_string())
+                    .collect();
+
+                let moves: Vec<String> = pokemon
+                    .moves
+                    .iter()
+                    .map(|m| m.move_.name.to_string())
+                    .collect();
+
+                Ok(PokemonRow {
+                    name: pokemon.name,
+                    types,
+                    abilities,
+                    moves,
+                })
+            }
+            Err(e) => Err(e),
+        }
     }
 }
-*/
-
 
 /* Example Output
 
