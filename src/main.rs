@@ -1,6 +1,6 @@
 use clap::Parser;
 
-use pokemon::{PokemonRow, PokemonTable};
+use pokemon::{PokemonMeta, PokemonTable, StatBlock};
 use rustemon::client::{
     CACacheManager, CacheMode, CacheOptions, Environment, RustemonClientBuilder,
 };
@@ -46,9 +46,26 @@ async fn main() {
         .try_build()
         .unwrap();
 
+    /*
     if let Some(name) = args.name {
-        match PokemonRow::new(&name, &client).await {
+        match PokemonMeta::new(&name, &client).await {
             Ok(row) => println!("{:#?}", row),
+            Err(_) => todo!(),
+        };
+    }
+    */
+
+    // Testing
+    if let Some(name) = args.name {
+        match PokemonMeta::new(&name, &client).await {
+            Ok(meta) => {
+                //println!("{:#?}", meta)
+
+                match StatBlock::new_from_meta(&meta, &client).await {
+                    Ok(stat) => println!("{:#?}", stat),
+                    Err(_) => todo!(),
+                }
+            }
             Err(_) => todo!(),
         };
     }
