@@ -96,6 +96,7 @@ impl PokemonMeta {
 pub struct StatBlock {
     name: String,
     flavor: String,
+    types: Vec<String>,
     abilities: Vec<Ability>,
     moves: Vec<Move>,
     level: u8,
@@ -106,7 +107,7 @@ pub struct StatBlock {
 impl StatBlock {
     pub async fn new_from_meta(meta: &PokemonMeta, c: &RustemonClient) -> Result<StatBlock, Error> {
         let name = meta.name.clone();
-
+        let types = meta.types.clone();
         // Random number between 1 and 6
         let mut rng = rand::thread_rng();
         let level: u8 = rng.gen_range(1..7);
@@ -199,6 +200,7 @@ impl StatBlock {
             level,
             hp,
             armor,
+            types,
         })
     }
 }
