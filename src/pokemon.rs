@@ -182,11 +182,13 @@ impl StatBlock {
                             .map(|m| m.flavor_text.clone())
                             .collect::<Vec<String>>()[0]
                             .clone(),
+                        type_: m.type_.name.clone(),
                     }
                 } else {
                     Move {
                         name: m.name.clone(),
                         description: "None".to_string(),
+                        type_: m.type_.name.clone(),
                     }
                 }
             })
@@ -209,6 +211,7 @@ impl StatBlock {
 pub struct Move {
     name: String,
     description: String,
+    type_: String,
 }
 
 #[derive(Debug)]
