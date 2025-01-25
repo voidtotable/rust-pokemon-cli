@@ -3,6 +3,7 @@ use futures::StreamExt;
 use rand::Rng;
 use rustemon::client::RustemonClient;
 use rustemon::error::Error;
+use rustemon::model::resource::FlavorText;
 use rustemon::Follow;
 
 #[derive(Debug)]
@@ -116,8 +117,15 @@ impl StatBlock {
 
         // Flavor Text
         let species = pokemon.species.follow(c).await?;
-        let max_flavor_texts = species.flavor_text_entries.len();
-        let flavor = species.flavor_text_entries[rng.gen_range(0..max_flavor_texts)]
+        let en_flavor_texts: Vec<FlavorText> = species
+            .flavor_text_entries
+            .iter()
+            .filter(|f| f.language.name.contains("en"))
+            .cloned()
+            .collect();
+        let max_flavor_texts = en_flavor_texts.len();
+
+        let flavor = en_flavor_texts[rng.gen_range(0..max_flavor_texts)]
             .flavor_text
             .clone();
 
@@ -138,7 +146,13 @@ impl StatBlock {
             .iter()
             .map(|a| Ability {
                 name: a.name.clone(),
-                description: a.flavor_text_entries[0].flavor_text.clone(),
+                description: a
+                    .flavor_text_entries
+                    .iter()
+                    .filter(|a| a.language.name.contains("en"))
+                    .map(|a| a.flavor_text.clone())
+                    .collect::<Vec<String>>()[0]
+                    .clone(),
             })
             .collect();
 
@@ -160,7 +174,13 @@ impl StatBlock {
                 if m.flavor_text_entries.len() > 0 {
                     Move {
                         name: m.name.clone(),
-                        description: m.flavor_text_entries[0].flavor_text.clone(),
+                        description: m
+                            .flavor_text_entries
+                            .iter()
+                            .filter(|m| m.language.name.contains("en"))
+                            .map(|m| m.flavor_text.clone())
+                            .collect::<Vec<String>>()[0]
+                            .clone(),
                     }
                 } else {
                     Move {
