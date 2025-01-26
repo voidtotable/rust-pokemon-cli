@@ -9,6 +9,7 @@ use rustemon::Follow;
 
 use std::time::Duration;
 
+pub mod cyphersystem;
 pub mod pokemon;
 
 #[derive(Parser, Debug)]
