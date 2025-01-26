@@ -2,6 +2,7 @@ use rand::Rng;
 
 pub struct NPC {
     name: String,
+    description: Option<String>,
     level: u8,
     health: u8,
     damage: u8,
@@ -10,12 +11,14 @@ pub struct NPC {
     abilities: Option<Vec<Ability>>,
     interaction: Option<String>,
     loot: Option<String>,
+    motive: Option<String>,
 }
 
 impl NPC {
     pub fn new(name: String, level: u8) -> NPC {
         NPC{
             name,
+            description: None,
             level,
             health: level * 3,
             damage: level,
@@ -24,6 +27,7 @@ impl NPC {
             abilities: None,
             interaction: None,
             loot: None,
+            motive: None,
         }
         
     }
@@ -40,6 +44,7 @@ impl NPC {
 
         NPC {
             name,
+            description: None,
             level,
             health,
             damage,
@@ -48,6 +53,7 @@ impl NPC {
             abilities: None,
             interaction: None,
             loot: None,
+            motive: None,
         }
     }
 }
@@ -63,4 +69,12 @@ pub enum Movement {
 pub struct Ability {
     name: String,
     description: Option<String>,
+}
+
+
+pub struct PokemonNPC {
+    npc: NPC,
+    types: Vec<String>,
+    moves: Vec<crate::pokemon::Move>,
+
 }
