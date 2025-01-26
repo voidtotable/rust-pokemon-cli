@@ -99,20 +99,12 @@ pub struct StatBlock {
     types: Vec<String>,
     abilities: Vec<Ability>,
     moves: Vec<Move>,
-    level: u8,
-    hp: u8,
-    armor: u8,
 }
 
 impl StatBlock {
     pub async fn new_from_meta(meta: &PokemonMeta, c: &RustemonClient) -> Result<StatBlock, Error> {
         let name = meta.name.clone();
         let types = meta.types.clone();
-        // Random number between 1 and 6
-        let mut rng = rand::thread_rng();
-        let level: u8 = rng.gen_range(1..7);
-        let hp: u8 = level * 3;
-        let armor: u8 = 0;
 
         let pokemon = rustemon::pokemon::pokemon::get_by_name(&meta.name, c).await?;
 
@@ -126,6 +118,7 @@ impl StatBlock {
             .collect();
         let max_flavor_texts = en_flavor_texts.len();
 
+        let mut rng = rand::thread_rng();
         let flavor = en_flavor_texts[rng.gen_range(0..max_flavor_texts)]
             .flavor_text
             .clone();
@@ -199,9 +192,6 @@ impl StatBlock {
             flavor,
             abilities,
             moves,
-            level,
-            hp,
-            armor,
             types,
         })
     }
