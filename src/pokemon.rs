@@ -3,6 +3,7 @@ use futures::StreamExt;
 use rand::Rng;
 use rustemon::client::RustemonClient;
 use rustemon::error::Error;
+use rustemon::model::pokemon::Pokemon;
 use rustemon::model::resource::FlavorText;
 use rustemon::Follow;
 
@@ -93,7 +94,7 @@ impl PokemonMeta {
 }
 
 #[derive(Debug)]
-pub struct StatBlock {
+pub struct PokemonDetails {
     name: String,
     flavor: String,
     types: Vec<String>,
@@ -101,8 +102,8 @@ pub struct StatBlock {
     moves: Vec<Move>,
 }
 
-impl StatBlock {
-    pub async fn new_from_meta(meta: &PokemonMeta, c: &RustemonClient) -> Result<StatBlock, Error> {
+impl PokemonDetails {
+    pub async fn new_from_meta(meta: &PokemonMeta, c: &RustemonClient) -> Result<PokemonDetails, Error> {
         let name = meta.name.clone();
         let types = meta.types.clone();
 
@@ -187,7 +188,7 @@ impl StatBlock {
             })
             .collect();
 
-        Ok(StatBlock {
+        Ok(PokemonDetails {
             name,
             flavor,
             abilities,
