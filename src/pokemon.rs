@@ -103,6 +103,14 @@ pub struct PokemonDetails {
 }
 
 impl PokemonDetails {
+
+    pub async fn new(name: &String, c: &RustemonClient) -> Result<PokemonDetails, Error> {
+        let meta = PokemonMeta::new(name, c).await?;
+
+        Self::new_from_meta(&meta, c).await
+
+    }
+
     pub async fn new_from_meta(meta: &PokemonMeta, c: &RustemonClient) -> Result<PokemonDetails, Error> {
         let name = meta.name.clone();
         let types = meta.types.clone();
