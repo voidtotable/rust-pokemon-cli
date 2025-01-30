@@ -90,6 +90,8 @@
             cargo-edit
             cargo-msrv
             cargo-outdated
+            pkg-config
+            openssl
 
             # Orchestration
             just
