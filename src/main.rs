@@ -1,5 +1,7 @@
 use clap::Parser;
 
+use cli::Args;
+
 use pokemon::{PokemonMeta, PokemonTable, PokemonDetails};
 use rustemon::client::{
     CACacheManager, CacheMode, CacheOptions, Environment, RustemonClientBuilder,
@@ -9,27 +11,14 @@ use rustemon::Follow;
 
 use std::time::Duration;
 
-pub mod cyphersystem;
-pub mod pokemon;
+mod cli;
+mod cyphersystem;
+mod pokemon;
 
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-struct Args {
-    /// Name
-    #[arg(short, long)]
-    name: Option<String>,
 
-    /// Types
-    #[arg(short, long)]
-    types: Option<String>,
-
-    /// Limit
-    #[arg(short, long, default_value_t = 10)]
-    limit: u8,
-}
 
 #[tokio::main]
-async fn main() {
+async fn main() -> eyre::Result<()> {
     let args = Args::parse();
 
     let client = RustemonClientBuilder::default()
@@ -77,4 +66,6 @@ async fn main() {
             Err(_) => todo!(),
         };
     }
+
+    Ok(())
 }
