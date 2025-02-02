@@ -1,15 +1,12 @@
 use futures::stream::FuturesUnordered;
 use futures::StreamExt;
 use itertools::Itertools;
-use rand::Rng;
 use rustemon::client::RustemonClient;
 use rustemon::error::Error;
-use rustemon::model::pokemon::Pokemon;
-use rustemon::model::resource::FlavorText;
 use rustemon::Follow;
 
 #[derive(Debug)]
-pub struct PokemonTable(Vec<PokemonMeta>);
+pub struct PokemonTable(Vec<Meta>);
 
 impl PokemonTable {
     pub async fn new_from_type(type_: &String, c: &RustemonClient) -> Result<PokemonTable, Error> {
@@ -32,7 +29,7 @@ impl PokemonTable {
                         .iter()
                         .map(|m| m.move_.name.to_string())
                         .collect();
-                    PokemonMeta {
+                    Meta {
                         name: pokemon.name,
                         types,
                         abilities,
@@ -41,7 +38,7 @@ impl PokemonTable {
                 });
                 let mut stream = FuturesUnordered::from_iter(futures);
 
-                let mut rows: Vec<PokemonMeta> = Vec::new();
+                let mut rows: Vec<Meta> = Vec::new();
                 while let Some(row) = stream.next().await {
                     rows.push(row);
                 }
@@ -53,15 +50,15 @@ impl PokemonTable {
 }
 
 #[derive(Debug)]
-pub struct PokemonMeta {
+pub struct Meta {
     name: String,
     types: Vec<String>,
     abilities: Vec<String>,
     moves: Vec<String>,
 }
 
-impl PokemonMeta {
-    pub async fn new(name: &String, c: &RustemonClient) -> Result<PokemonMeta, Error> {
+impl Meta {
+    pub async fn new(name: &String, c: &RustemonClient) -> Result<Meta, Error> {
         match rustemon::pokemon::pokemon::get_by_name(name, c).await {
             Ok(pokemon) => {
                 let types: Vec<String> = pokemon
@@ -82,7 +79,7 @@ impl PokemonMeta {
                     .map(|m| m.move_.name.to_string())
                     .collect();
 
-                Ok(PokemonMeta {
+                Ok(Meta {
                     name: pokemon.name,
                     types,
                     abilities,
@@ -95,7 +92,7 @@ impl PokemonMeta {
 }
 
 #[derive(Debug)]
-pub struct PokemonDetails {
+pub struct Pokemon {
     name: String,
     flavor: Vec<String>,
     types: Vec<String>,
@@ -103,17 +100,14 @@ pub struct PokemonDetails {
     moves: Vec<Move>,
 }
 
-impl PokemonDetails {
-    pub async fn new(name: &String, c: &RustemonClient) -> Result<PokemonDetails, Error> {
-        let meta = PokemonMeta::new(name, c).await?;
+impl Pokemon {
+    pub async fn new(name: &String, c: &RustemonClient) -> Result<Pokemon, Error> {
+        let meta = Meta::new(name, c).await?;
 
         Self::new_from_meta(&meta, c).await
     }
 
-    pub async fn new_from_meta(
-        meta: &PokemonMeta,
-        c: &RustemonClient,
-    ) -> Result<PokemonDetails, Error> {
+    pub async fn new_from_meta(meta: &Meta, c: &RustemonClient) -> Result<Pokemon, Error> {
         let name = meta.name.clone();
         let types = meta.types.clone();
 
@@ -193,7 +187,8 @@ impl PokemonDetails {
             })
             .collect();
 
-        Ok(PokemonDetails {
+
+        Ok(Pokemon {
             name,
             flavor,
             abilities,

@@ -2,12 +2,10 @@ use clap::Parser;
 
 use cli::Args;
 
-use pokemon::{PokemonDetails, PokemonMeta, PokemonTable};
+use pokemon::{Meta, Pokemon, PokemonTable};
 use rustemon::client::{
     CACacheManager, CacheMode, CacheOptions, Environment, RustemonClientBuilder,
 };
-use rustemon::error::Error;
-use rustemon::Follow;
 
 use std::time::Duration;
 
@@ -36,7 +34,7 @@ async fn main() -> eyre::Result<()> {
 
     /*
     if let Some(name) = args.name {
-        match PokemonMeta::new(&name, &client).await {
+        match Meta::new(&name, &client).await {
             Ok(row) => println!("{:#?}", row),
             Err(_) => todo!(),
         };
@@ -45,11 +43,11 @@ async fn main() -> eyre::Result<()> {
 
     // Testing
     if let Some(name) = args.name {
-        match PokemonMeta::new(&name, &client).await {
+        match Meta::new(&name, &client).await {
             Ok(meta) => {
                 //println!("{:#?}", meta)
 
-                match PokemonDetails::new_from_meta(&meta, &client).await {
+                match Pokemon::new_from_meta(&meta, &client).await {
                     Ok(stat) => println!("{:#?}", stat),
                     Err(_) => todo!(),
                 }
