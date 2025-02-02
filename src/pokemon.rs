@@ -187,7 +187,6 @@ impl Pokemon {
             })
             .collect();
 
-
         Ok(Pokemon {
             name,
             flavor,
