@@ -93,11 +93,11 @@ impl Meta {
 
 #[derive(Debug)]
 pub struct Pokemon {
-    name: String,
-    flavor: Vec<String>,
-    types: Vec<String>,
-    abilities: Vec<Ability>,
-    moves: Vec<Move>,
+    pub name: String,
+    pub flavor: Vec<String>,
+    pub types: Vec<String>,
+    pub abilities: Vec<Ability>,
+    pub moves: Vec<Move>,
 }
 
 impl Pokemon {
@@ -197,7 +197,7 @@ impl Pokemon {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Move {
     name: String,
     description: String,
