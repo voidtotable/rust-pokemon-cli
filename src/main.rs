@@ -2,7 +2,7 @@ use clap::Parser;
 
 use cli::Args;
 
-use pokemon::{PokemonMeta, PokemonTable, PokemonDetails};
+use pokemon::{PokemonDetails, PokemonMeta, PokemonTable};
 use rustemon::client::{
     CACacheManager, CacheMode, CacheOptions, Environment, RustemonClientBuilder,
 };
@@ -14,8 +14,6 @@ use std::time::Duration;
 mod cli;
 mod cyphersystem;
 mod pokemon;
-
-
 
 #[tokio::main]
 async fn main() -> eyre::Result<()> {

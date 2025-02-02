@@ -1,5 +1,6 @@
 use futures::stream::FuturesUnordered;
 use futures::StreamExt;
+use itertools::Itertools;
 use rand::Rng;
 use rustemon::client::RustemonClient;
 use rustemon::error::Error;
@@ -96,22 +97,23 @@ impl PokemonMeta {
 #[derive(Debug)]
 pub struct PokemonDetails {
     name: String,
-    flavor: String,
+    flavor: Vec<String>,
     types: Vec<String>,
     abilities: Vec<Ability>,
     moves: Vec<Move>,
 }
 
 impl PokemonDetails {
-
     pub async fn new(name: &String, c: &RustemonClient) -> Result<PokemonDetails, Error> {
         let meta = PokemonMeta::new(name, c).await?;
 
         Self::new_from_meta(&meta, c).await
-
     }
 
-    pub async fn new_from_meta(meta: &PokemonMeta, c: &RustemonClient) -> Result<PokemonDetails, Error> {
+    pub async fn new_from_meta(
+        meta: &PokemonMeta,
+        c: &RustemonClient,
+    ) -> Result<PokemonDetails, Error> {
         let name = meta.name.clone();
         let types = meta.types.clone();
 
@@ -119,18 +121,13 @@ impl PokemonDetails {
 
         // Flavor Text
         let species = pokemon.species.follow(c).await?;
-        let en_flavor_texts: Vec<FlavorText> = species
+        let flavor: Vec<String> = species
             .flavor_text_entries
             .iter()
             .filter(|f| f.language.name.contains("en"))
-            .cloned()
+            .map(|f| f.flavor_text.replace("\n", " ").replace("\u{c}", ""))
+            .unique()
             .collect();
-        let max_flavor_texts = en_flavor_texts.len();
-
-        let mut rng = rand::thread_rng();
-        let flavor = en_flavor_texts[rng.gen_range(0..max_flavor_texts)]
-            .flavor_text
-            .clone();
 
         // Abilities
         let futures = meta.abilities.iter().map(|ability| async {
@@ -153,7 +150,7 @@ impl PokemonDetails {
                     .flavor_text_entries
                     .iter()
                     .filter(|a| a.language.name.contains("en"))
-                    .map(|a| a.flavor_text.clone())
+                    .map(|a| a.flavor_text.replace("\n", " "))
                     .collect::<Vec<String>>()[0]
                     .clone(),
             })
@@ -181,7 +178,7 @@ impl PokemonDetails {
                             .flavor_text_entries
                             .iter()
                             .filter(|m| m.language.name.contains("en"))
-                            .map(|m| m.flavor_text.clone())
+                            .map(|m| m.flavor_text.replace("\n", " ").replace("\u{ad} ", ""))
                             .collect::<Vec<String>>()[0]
                             .clone(),
                         type_: m.type_.name.clone(),

@@ -16,7 +16,7 @@ pub struct NPC {
 
 impl NPC {
     pub fn new(name: String, level: u8) -> NPC {
-        NPC{
+        NPC {
             name,
             description: None,
             level,
@@ -29,7 +29,6 @@ impl NPC {
             loot: None,
             motive: None,
         }
-        
     }
 
     pub fn new_random(name: String) -> NPC {
@@ -71,10 +70,8 @@ pub struct Ability {
     description: Option<String>,
 }
 
-
 pub struct PokemonNPC {
     npc: NPC,
     types: Vec<String>,
     moves: Vec<crate::pokemon::Move>,
-
 }
