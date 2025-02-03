@@ -1,7 +1,9 @@
+use askama::Template;
 use clap::Parser;
 
 use cli::Args;
 
+use cyphersystem::PokemonNPC;
 use pokemon::{Meta, Pokemon, PokemonTable};
 use rustemon::client::{
     CACacheManager, CacheMode, CacheOptions, Environment, RustemonClientBuilder,
@@ -32,28 +34,21 @@ async fn main() -> eyre::Result<()> {
         .try_build()
         .unwrap();
 
-    /*
-    if let Some(name) = args.name {
-        match Meta::new(&name, &client).await {
-            Ok(row) => println!("{:#?}", row),
-            Err(_) => todo!(),
-        };
-    }
-    */
+    let rng = rand::thread_rng();
+        
+   
 
     // Testing
     if let Some(name) = args.name {
-        match Meta::new(&name, &client).await {
-            Ok(meta) => {
-                //println!("{:#?}", meta)
+        match Pokemon::new(&name, &client).await {
+            Ok(pokemon) => {
+                //println!("{:#?}", pokemon)
 
-                match Pokemon::new_from_meta(&meta, &client).await {
-                    Ok(stat) => println!("{:#?}", stat),
-                    Err(_) => todo!(),
-                }
+                let npc = PokemonNPC::new_from_pokemon(pokemon).prune(3, rng);
+                println!("{}", npc.render().unwrap())
             }
             Err(_) => todo!(),
-        };
+        }
     }
 
     if let Some(types) = args.types {
