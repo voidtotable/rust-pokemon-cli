@@ -1,4 +1,7 @@
+use std::fmt;
+
 use crate::Pokemon;
+use askama::Template;
 use rand::rngs::ThreadRng;
 use rand::seq::SliceRandom;
 use rand::Rng;
@@ -25,8 +28,8 @@ impl NPC {
             description: None,
             level,
             health: health(level),
-            damage: level,
             armor: 0,
+            damage: level,
             movement: Some(Movement::Short),
             abilities: None,
             interaction: None,
@@ -80,13 +83,26 @@ pub enum Movement {
     Other(String),
 }
 
+impl fmt::Display for Movement {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Movement::Immediate => write!(f, "Immediate"),
+            Movement::Short => write!(f, "Short"),
+            Movement::Long => write!(f, "Long"),
+            Movement::VeryLong => write!(f, "Very Long"),
+            Movement::Other(other) => write!(f, "{}", other.to_string()),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Ability {
     name: String,
     description: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Template)]
+#[template(path = "pokemon.md")]
 pub struct PokemonNPC {
     pub npc: NPC,
     pub flavor: Vec<String>,

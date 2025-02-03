@@ -199,13 +199,13 @@ impl Pokemon {
 
 #[derive(Debug, Clone)]
 pub struct Move {
-    name: String,
-    description: String,
-    type_: String,
+    pub name: String,
+    pub description: String,
+    pub type_: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct Ability {
-    name: String,
-    description: String,
+    pub name: String,
+    pub description: String,
 }
