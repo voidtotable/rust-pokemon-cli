@@ -204,7 +204,7 @@ pub struct Move {
     type_: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Ability {
     name: String,
     description: String,
