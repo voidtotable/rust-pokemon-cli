@@ -6,6 +6,18 @@ use rand::rngs::ThreadRng;
 use rand::seq::SliceRandom;
 use rand::Rng;
 
+mod filters {
+    pub fn display_some<T>(value: &Option<T>) -> askama::Result<String>
+    where
+        T: std::fmt::Display,
+    {
+        Ok(match value {
+            Some(value) => value.to_string(),
+            None => String::new(),
+        })
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct NPC {
     pub name: String,
