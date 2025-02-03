@@ -3,7 +3,7 @@ use rand::rngs::ThreadRng;
 use rand::seq::SliceRandom;
 use rand::Rng;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NPC {
     pub name: String,
     pub description: Option<String>,
@@ -71,7 +71,7 @@ fn health(level: u8) -> u8 {
     level * 3
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Movement {
     Immediate,
     Short,
@@ -80,13 +80,13 @@ pub enum Movement {
     Other(String),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Ability {
     name: String,
     description: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PokemonNPC {
     pub npc: NPC,
     pub flavor: Vec<String>,
@@ -109,11 +109,13 @@ impl PokemonNPC {
     }
 
     /// Randomly prunes flavor to a single flavor, and moves to the specified max
-    pub fn prune(&mut self, max_moves: u8, mut rng: ThreadRng) {
+    pub fn prune(self, max_moves: u8, mut rng: ThreadRng) -> Self {
+        let mut pruned = self.clone();
+
         // Choose moves
         let max_moves = usize::from(max_moves);
         if max_moves <= self.moves.len() {
-            self.moves = self
+            pruned.moves = self
                 .moves
                 .choose_multiple(&mut rng, max_moves)
                 .cloned()
@@ -122,13 +124,16 @@ impl PokemonNPC {
 
         // Choose flavor
         if let Some(flavor) = self.flavor.choose(&mut rng) {
-            self.flavor = vec![flavor.to_string()];
+            pruned.flavor = vec![flavor.to_string()];
         }
+
+        return pruned;
     }
 
     /// Prunes PokemonNPC based the set NPC level.
-    pub fn prune_by_level(&mut self, rng: ThreadRng) {
-        self.prune(self.npc.level, rng);
+    pub fn prune_by_level(self, rng: ThreadRng) -> Self {
+        let max_moves = self.npc.level;
+        return self.prune(max_moves, rng);
     }
 
     /// Returns the first flavor text, or an empty string if that does not exist
@@ -197,14 +202,13 @@ mod tests {
         let name = "bulbasaur".to_string();
         match Pokemon::new(&name, &client).await {
             Ok(pokemon) => {
-                let mut npc = PokemonNPC::new_from_pokemon(pokemon);
+                let npc = PokemonNPC::new_from_pokemon(pokemon);
                 let max_moves = 2;
-                
-                npc.prune(max_moves, rng);
-                assert_eq!(npc.moves.len(), <usize>::from(max_moves));
-                assert_eq!(npc.flavor.len(), 1);
-                println!("{:#?}", npc);
 
+                let pruned = npc.prune(max_moves, rng);
+                assert_eq!(pruned.moves.len(), <usize>::from(max_moves));
+                assert_eq!(pruned.flavor.len(), 1);
+                println!("{:#?}", pruned);
             }
             Err(e) => {
                 eprintln!("{:#?}", e);
@@ -221,13 +225,12 @@ mod tests {
         let name = "bulbasaur".to_string();
         match Pokemon::new(&name, &client).await {
             Ok(pokemon) => {
-                let mut npc = PokemonNPC::new_from_pokemon(pokemon);
-                
-                npc.prune_by_level(rng);
-                assert_eq!(npc.moves.len(), 1);
-                assert_eq!(npc.flavor.len(), 1);
-                println!("{:#?}", npc);
+                let npc = PokemonNPC::new_from_pokemon(pokemon);
 
+                let pruned = npc.prune_by_level(rng);
+                assert_eq!(pruned.moves.len(), 1);
+                assert_eq!(pruned.flavor.len(), 1);
+                println!("{:#?}", pruned);
             }
             Err(e) => {
                 eprintln!("{:#?}", e);
@@ -244,17 +247,15 @@ mod tests {
         let name = "bulbasaur".to_string();
         match Pokemon::new(&name, &client).await {
             Ok(pokemon) => {
-                let mut npc = PokemonNPC::new_from_pokemon(pokemon);
+                let npc = PokemonNPC::new_from_pokemon(pokemon);
                 if let Ok(max_moves) = u8::try_from(npc.moves.len() + 1) {
-                    npc.prune(max_moves, rng);
-                    assert_ne!(npc.moves.len(), <usize>::from(max_moves));
-                    assert_eq!(npc.flavor.len(), 1);
-                    println!("{:#?}", npc);
+                    let pruned = npc.prune(max_moves, rng);
+                    assert_ne!(pruned.moves.len(), <usize>::from(max_moves));
+                    assert_eq!(pruned.flavor.len(), 1);
+                    println!("{:#?}", pruned);
                 } else {
                     panic!("Error converting usize to u8")
                 }
-                
-
             }
             Err(e) => {
                 eprintln!("{:#?}", e);
@@ -262,5 +263,4 @@ mod tests {
             }
         }
     }
-    
 }
