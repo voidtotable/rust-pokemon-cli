@@ -36,12 +36,8 @@ impl PokemonTable {
                         moves,
                     }
                 });
-                let mut stream = FuturesUnordered::from_iter(futures);
+                let rows = FuturesUnordered::from_iter(futures).collect().await;
 
-                let mut rows: Vec<Meta> = Vec::new();
-                while let Some(row) = stream.next().await {
-                    rows.push(row);
-                }
                 return Ok(PokemonTable(rows));
             }
             Err(_) => todo!(),
@@ -129,12 +125,8 @@ impl Pokemon {
                 .await
                 .unwrap()
         });
-        let mut stream = FuturesUnordered::from_iter(futures);
-
-        let mut abilities: Vec<rustemon::model::pokemon::Ability> = Vec::new();
-        while let Some(ability) = stream.next().await {
-            abilities.push(ability);
-        }
+        let abilities: Vec<rustemon::model::pokemon::Ability> =
+            FuturesUnordered::from_iter(futures).collect().await;
 
         let abilities: Vec<Ability> = abilities
             .iter()
@@ -155,12 +147,8 @@ impl Pokemon {
             .moves
             .iter()
             .map(|move_| async { rustemon::moves::move_::get_by_name(move_, c).await.unwrap() });
-        let mut stream = FuturesUnordered::from_iter(futures);
-
-        let mut moves: Vec<rustemon::model::moves::Move> = Vec::new();
-        while let Some(move_) = stream.next().await {
-            moves.push(move_);
-        }
+        let moves: Vec<rustemon::model::moves::Move> =
+            FuturesUnordered::from_iter(futures).collect().await;
 
         let moves: Vec<Move> = moves
             .iter()

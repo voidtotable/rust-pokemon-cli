@@ -35,8 +35,6 @@ async fn main() -> eyre::Result<()> {
         .unwrap();
 
     let rng = rand::thread_rng();
-        
-   
 
     // Testing
     if let Some(name) = args.name {
