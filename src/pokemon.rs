@@ -1,9 +1,10 @@
 use futures::stream::FuturesUnordered;
-use futures::StreamExt;
+//use futures::StreamExt;
+use eyre::Error;
 use itertools::Itertools;
 use rustemon::client::RustemonClient;
-use rustemon::error::Error;
 use rustemon::Follow;
+use tokio_stream::{self as stream, StreamExt};
 
 #[derive(Debug)]
 pub struct PokemonTable(Vec<Meta>);
@@ -13,7 +14,7 @@ impl PokemonTable {
         match rustemon::pokemon::type_::get_by_name(type_, c).await {
             Ok(t) => {
                 let futures = t.pokemon.iter().map(|tp| async {
-                    let pokemon = tp.pokemon.follow(&c).await.unwrap();
+                    let pokemon = tp.pokemon.follow(&c).await?;
                     let types: Vec<String> = pokemon
                         .types
                         .iter()
@@ -29,18 +30,20 @@ impl PokemonTable {
                         .iter()
                         .map(|m| m.move_.name.to_string())
                         .collect();
-                    Meta {
+                    Ok(Meta {
                         name: pokemon.name,
                         types,
                         abilities,
                         moves,
-                    }
+                    })
                 });
-                let rows = FuturesUnordered::from_iter(futures).collect().await;
+                let rows = FuturesUnordered::from_iter(futures)
+                    .collect::<Result<_, rustemon::error::Error>>()
+                    .await?;
 
                 return Ok(PokemonTable(rows));
             }
-            Err(_) => todo!(),
+            Err(e) => return Err(e.into()),
         }
     }
 }
@@ -82,7 +85,7 @@ impl Meta {
                     moves,
                 })
             }
-            Err(e) => Err(e),
+            Err(e) => Err(e.into()),
         }
     }
 }
@@ -120,13 +123,15 @@ impl Pokemon {
             .collect();
 
         // Abilities
-        let futures = meta.abilities.iter().map(|ability| async {
-            rustemon::pokemon::ability::get_by_name(ability, c)
-                .await
-                .unwrap()
-        });
+        let futures = meta
+            .abilities
+            .iter()
+            .map(|ability| async { rustemon::pokemon::ability::get_by_name(ability, c).await });
+
         let abilities: Vec<rustemon::model::pokemon::Ability> =
-            FuturesUnordered::from_iter(futures).collect().await;
+            FuturesUnordered::from_iter(futures)
+                .collect::<Result<_, _>>()
+                .await?;
 
         let abilities: Vec<Ability> = abilities
             .iter()
@@ -146,9 +151,11 @@ impl Pokemon {
         let futures = meta
             .moves
             .iter()
-            .map(|move_| async { rustemon::moves::move_::get_by_name(move_, c).await.unwrap() });
-        let moves: Vec<rustemon::model::moves::Move> =
-            FuturesUnordered::from_iter(futures).collect().await;
+            .map(|move_| async { rustemon::moves::move_::get_by_name(move_, c).await });
+
+        let moves: Vec<rustemon::model::moves::Move> = FuturesUnordered::from_iter(futures)
+            .collect::<Result<_, _>>()
+            .await?;
 
         let moves: Vec<Move> = moves
             .iter()

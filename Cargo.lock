@@ -1657,6 +1657,7 @@ dependencies = [
  "rand",
  "rustemon",
  "tokio",
+ "tokio-stream",
 ]
 
 [[package]]
