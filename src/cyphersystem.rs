@@ -16,6 +16,11 @@ mod filters {
             None => String::new(),
         })
     }
+
+    pub fn dash_to_space<T: std::fmt::Display>(s: T) -> ::askama::Result<String> {
+        let s = s.to_string();
+        Ok(s.replace("-", " "))
+    }
 }
 
 #[derive(Debug, Clone)]

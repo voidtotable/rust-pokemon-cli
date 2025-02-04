@@ -16,7 +16,7 @@ abilities: {% for ability in abilities %}
 moves: {% for move in moves %}
 - {{ move.name }}{% endfor %}
 ---
-# {{ npc.name }}
+# {{ npc.name|capitalize }}
 
 ## Description
 
@@ -36,12 +36,12 @@ moves: {% for move in moves %}
 
 ## Types
 {% for type in types %}
-- {{ type }}{% endfor %}
+- {{ type|capitalize }}{% endfor %}
 
 ## Abilities
 {% for ability in abilities %}
-- **{{ ability.name }}** - {{ ability.description }}{% endfor %}
+- **{{ ability.name|dash_to_space|capitalize }}** - {{ ability.description }}{% endfor %}
 
 ## Moves
 {% for move in moves %}
-- **{{ move.name }}** - {{ move.description }}{% endfor %}
+- **{{ move.name|dash_to_space|capitalize }}** `[{{ move.type_ }}]` - {{ move.description }}{% endfor %}
